@@ -263,8 +263,8 @@ embedding learned with local constraints}
         \item Threshold the distance map to get the central region of an object. Authors use $T_c = 0.7$ in their experiment.
         \item Compute the mean embedding $u_k$ of each seed region.
         \item Iteratively perform morphological dilation with a $3 \times 3$ kernel.
-        Frontier pixels $e_i$ are included into the object, if it is not assigned to other objects and
-        $D(e_i, u_k)$ is smaller than $T_e = 0.3$.
+              Frontier pixels $e_i$ are included into the object, if it is not assigned to other objects and
+              $D(e_i, u_k)$ is smaller than $T_e = 0.3$.
         \item Stop when no new pixels are included.
     \end{enumerate}
 
@@ -280,21 +280,88 @@ embedding learned with local constraints}
 \begin{frame}
     \frametitle{Qualitative results }
 
+    Datasets which have been used for evaluation:
+    \begin{itemize}
+        \item Cells: sampled 1233 images from BBBC006+partDSB2018
+        \item Leaves: sampled 810 images from CVPPP2017
+    \end{itemize}
 
-
-\end{frame}
-
-\begin{frame}
-    \frametitle{Cell Dataset Metrics}
-
-
+    \begin{figure}[h]
+        \includegraphics[height=0.5\textheight]{results_pict_comp.png}
+        \caption{Comparison of different method on datasets.
+            In the first row, correct matches (IoU = 0.6) are highlighted in
+            blue, while false positives are marked in red. The second row shows the leaf
+            segmentation results with color-coded instances}
+    \end{figure}
 
 \end{frame}
 
 \begin{frame}
     \frametitle{Leaf Dataset Metrics}
 
+    \begin{table}
+        \small
+        \begin{tabular}[pos]{*{5}{c}}
+            \hline
+            Metric                                                                     & SBD             & FBD             & DiC              & $|$DiC$|$       \\
+            \hline
+            Unet9\footnote{simplified: 3 down and 3 up}                                & 0.5456          & 0.9045          & -3.9259          & 5.0370          \\
+            Stardist                                                                   & 0.8019          & 0.9327          & 1.9506           & 2.6543          \\
+            Mask-RCNN\footnote{fine-tuned, pretrained on MS COCO}                      & 0.7972          & 0.9060          & -0.1543          & 1.080           \\
+            \hline
+            d10-dim16\footnote{$d$ -- neighborhood size, $dim$ -- embedding dimension} & \textbf{0.8307} & \textbf{0.9417} & \textbf{-0.1790} & \textbf{0.7346} \\
+            d30-dim16                                                                  & 0.8159          & 0.9303          & -0.2160          & 0.7593          \\
+            d100-dim16                                                                 & 0.8101          & 0.9312          & -0.2593          & 0.9259          \\
+            \hline
+            d10-dim4                                                                   & 0.8005          & 0.9377          & -0.6605          & 1.0185          \\
+            d30-dim4                                                                   & 0.7163          & 0.3338          & -0.6358          & 0.9444          \\
+            d100-dim4                                                                  & 0.7095          & 0.3495          & -0.5432          & 1.0741          \\
+            \hline
+        \end{tabular}
+        \caption{Value of metrics on the leaves dataset}
+    \end{table}
 
+    \vspace*{-0.5cm}
+    \begin{itemize}
+        \item Embeddings matter: low embedding dimension
+              - bad metric's value
+        \item Local better than global, because using embedding space
+              efficiently
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Cell Dataset Metrics}
+
+    \begin{table}
+        \scalebox{0.7}
+        {
+            \begin{tabular}[pos]{*{11}{c}}
+                \hline
+                \textit{IoU} & 0.5            & 0.55           & 0.6            & 0.65           & 0.7            & 0.75           & 0.8            & 0.85           & 0.9            & mean AP        \\
+                \hline
+                UNet         & .8302          & .8152          & .7994          & .7816          & .7609          & .7206          & .6216          & .4478          & .2332          & .6678          \\
+                Stardist     & .8178          & .8015          & .7880          & .7733          & .7552          & .7304          & .6910          & .6225          & .4749          & .7172          \\
+                Mask-RCNN    & .8820          & .8636          & .8492          & .8354          & \textbf{.8231} & \textbf{.8030} & \textbf{.7728} & \textbf{.7095} & .5483          & \textbf{.7874} \\
+                \hline
+                d10-dim16    & \textbf{.9108} & \textbf{.8858} & \textbf{.8611} & \textbf{.8428} & .7936          & .7518          & .7031          & .6466          & \textbf{.5528} & .7720          \\
+                d30-dim16    & .9039          & .8727          & .8480          & .8169          & .7776          & .7305          & .6805          & .6272          & .5311          & .7543          \\
+                d100-dim16   & .9007          & .8765          & .8507          & .8212          & .7812          & .7354          & .6842          & .6256          & .5190          & .7549          \\
+                \hline
+                d10-dim4     & .9040          & .8786          & .8533          & .8130          & .7723          & .7203          & .6778          & .6254          & .5386          & .7537          \\
+                d30-dim4     & .8925          & .8637          & .8339          & .8003          & .7525          & .7043          & .6624          & .6047          & .4878          & .7335          \\
+                d100-dim4    & .6289          & .6090          & .5871          & .5567          & .5166          & .4828          & .4494          & .4082          & .3181          & .5063          \\
+                \hline
+            \end{tabular}
+        }
+        \caption{Value of AP metric on the cell dataset for different IoU}
+    \end{table}
+
+    \begin{block}{Why Mask R-CNN better in high IoU range?}
+        Sometimes near the boundary of some objects embeddings are
+        inconsistent $\implies$ incomplete segmentation.
+    \end{block}
 
 \end{frame}
 
