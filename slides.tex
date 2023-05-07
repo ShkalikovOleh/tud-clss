@@ -209,25 +209,69 @@ embedding learned with local constraints}
         object but orthogonal for every two \textbf{neighboring} objects.
     \end{block}
 
+    \begin{figure}[h]
+        \includegraphics[height=0.49\textheight]{obj_aware_arch.png}
+        \caption{Proposed architecture with 2 heads: for distance to boundary
+            regression and embeddings. Source: \cite{chen2019instance}}
+    \end{figure}
+
 \end{frame}
 
 \begin{frame}
     \frametitle{Actual Implementation}
 
+    \begin{alertblock}{Difference in paper and official implementation}
+        In official implementation authors use UNet like architecture, but starting with
+        the first upsampling block they use different layers for distance regressor and
+        embeddings.
+    \end{alertblock}
+
+    \begin{figure}[h]
+        \includegraphics[height=0.43\textheight]{net_impl.png}
+        \caption{Actual network implementation. Source: \url{https://github.com/looooongChen/instance_segmentation_with_pixel_embeddings}}
+    \end{figure}
 
 \end{frame}
 
 \begin{frame}
     \frametitle{Loss function}
 
+    Total loss is a sum of 2 losses (here $\lambda = 5$)
+    \[
+        L = L_{reg} + \lambda L_{emb}
+    \]
 
+    Suppose there are $K$ objects within an image with ($M_1$, $M_2$, $\dots$ , $M_K$ )
+    pixels respectively and the cosine distance denoted as $D$, then
+    \[
+        L_{reg} = \frac{1}{\sum\limits_{k=1}^K M_k} \sum\limits_{k=1}^K \sum\limits_{p=1}^{M_k} w_p (d_p - \hat{d_p})^2
+    \]
+    \[
+        L_{emb} = \frac{1}{\sum\limits_{k=1}^K M_k} \sum\limits_{k=1}^K \sum\limits_{p=1}^{M_k} w_p D(e_p, u_k) +
+        \frac{1}{K} \sum\limits_{k=1}^K \frac{1}{|N_d(k)|} \sum\limits_{n \in N_d(k)} |1 - D(e_p, u_k)|
+    \]
+    where $d_p$ and $\hat{d_p}$ -- reg. output and ground truth of $p$, $e_p$ --
+    embedding of $p$, $u_k$ -- mean embedding of object $k$,
+    $w_p$ -- foreground / background weight. $N_d(k)$ -- $d$-neighborhood of object $k$.
 
 \end{frame}
 
 \begin{frame}
     \frametitle{Postprocessing}
 
+    \begin{enumerate}
+        \item Threshold the distance map to get the central region of an object. Authors use $T_c = 0.7$ in their experiment.
+        \item Compute the mean embedding $u_k$ of each seed region.
+        \item Iteratively perform morphological dilation with a $3 \times 3$ kernel.
+        Frontier pixels $e_i$ are included into the object, if it is not assigned to other objects and
+        $D(e_i, u_k)$ is smaller than $T_e = 0.3$.
+        \item Stop when no new pixels are included.
+    \end{enumerate}
 
+    \begin{exampleblock}{Alternative}
+        Mean-shift, graph watershed, other clustering methods that
+        does not require to specify the number of clusters
+    \end{exampleblock}
 
 \end{frame}
 
@@ -280,8 +324,6 @@ embedding learned with local constraints}
 
 \begin{frame}[allowframebreaks]
     \frametitle{References}
-
-    \nocite{chen2019instance}
 
     \bibliographystyle{apalike}
     \bibliography{references.bib}
