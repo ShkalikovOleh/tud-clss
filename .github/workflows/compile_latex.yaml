@@ -1,0 +1,36 @@
+name: Compile LaTeX
+on:
+  push:
+    tags:
+      - '**'
+
+jobs:
+  compile_latex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v3
+      - name: pdflatex 1 run
+        uses: dante-ev/latex-action@latest
+        with:
+          root_file: slides.tex
+          compiler: pdflatex
+          args: -interaction=nonstopmode -shell-escape
+      - name: bibtex
+        uses: dante-ev/latex-action@latest
+        with:
+          root_file: slides.aux
+          compiler: bibtex
+          args:
+      - name: pdflatex 2 run
+        uses: dante-ev/latex-action@latest
+        with:
+          root_file: slides.tex
+          compiler: pdflatex
+          args: -interaction=nonstopmode -shell-escape
+      - name: Create release
+        uses: elgohr/Github-Release-Action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        with:
+          title: Slides for the Computational Life Science Seminar at TU Dresden (SS 2023)
