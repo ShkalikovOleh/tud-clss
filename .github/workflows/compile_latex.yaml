@@ -10,24 +10,12 @@ jobs:
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v3
-      - name: pdflatex 1 run
+      - name: Compilation
         uses: dante-ev/latex-action@latest
         with:
           root_file: slides.tex
-          compiler: pdflatex
-          args: -interaction=nonstopmode -shell-escape
-      - name: bibtex
-        uses: dante-ev/latex-action@latest
-        with:
-          root_file: slides.aux
-          compiler: bibtex
-          args:
-      - name: pdflatex 2 run
-        uses: dante-ev/latex-action@latest
-        with:
-          root_file: slides.tex
-          compiler: pdflatex
-          args: -interaction=nonstopmode -shell-escape
+          compiler: latexmk
+          args: -pdf
       - name: Create release
         uses: svenstaro/upload-release-action@v2
         with:
