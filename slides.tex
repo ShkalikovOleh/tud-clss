@@ -151,7 +151,7 @@ embedding learned with local constraints}
     Let $M$ be a number of actual objects and $P$ -- predicted,
     $L$ and $\hat{L}$ be an
     predicted and actual object labeling respectively, then
-    (Foreground) \textbf{Dice} or Jaccard Index is
+    \textbf{Dice} is
     \[
         \text{Dice}(L, \hat{L}) = \frac{2|L \cap \hat{L}|}{|L| + |\hat{L}|}
     \]
@@ -461,12 +461,54 @@ embedding learned with local constraints}
 \begin{frame}
     \frametitle{Instance Segmentation of Dense and Overlapping Objects via Layering}
 
+    \begin{block}{Idea}
+        Divide adjacent objects into different layers using \textbf{embeddings}
+        and then merge different layers into
+        the final segmentation.
+    \end{block}
 
+    \begin{figure}[h]
+        \includegraphics[width=0.75\textwidth]{inst_segm_layering.png}
+        \caption{Diagram of the proposed approach. Source  publication is \cite{chen2022instance}
+            (a)~Pushing adjacent objects into different layers. (b)~Complete (refine)
+            the segmentation.}
+    \end{figure}
 
 \end{frame}
 
 \begin{frame}
     \frametitle{SOTA in the Instance Segmentation}
+
+    \begin{table}
+        \begin{tabular}{|c|c|}
+            \hline
+            \textbf{Dataset} & \textbf{Best Model}                     \\
+            \hline
+            \hline
+            COCO test-dev    & InternImage-H                           \\
+            \hline
+            COCO minival     & InternImage-H                           \\
+            \hline
+            LVIS v1.0 val    & EVA                                     \\
+            \hline
+            Cityscapes val   & OneFormer (ConvNeXt-L)                  \\
+            \hline
+            Cityscapes test  & PolyTransform                           \\
+            \hline
+            ADE20K val       & OpenSeeD                                \\
+            \hline
+            Occluded COCO    & Swin-B + Cascade Mask R-CNN (tri-layer) \\
+            \hline
+            Separated COCO   & Swin-B + Cascade Mask R-CNN (tri-layer) \\
+            \hline
+            iSAID            & PANet++                                 \\
+            \hline
+            TBBR             & Swin-T (ImageNet-1k pretrain)           \\
+            \hline
+        \end{tabular}
+        \caption{State of the art model for different datasets. Source:
+            \url{https://paperswithcode.com/task/instance-segmentation}}
+    \end{table}
 
 \end{frame}
 
