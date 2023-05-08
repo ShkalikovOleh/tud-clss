@@ -3,6 +3,8 @@
 
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{multirow}
 
 \usepackage{tikz}
 
@@ -28,6 +30,8 @@
 \setbeamertemplate{bibliography entry title}{}
 \setbeamertemplate{bibliography entry location}{}
 \setbeamertemplate{bibliography entry note}{}
+
+\DeclareMathOperator{\AP}{AP}
 
 % Metadata
 % ------------------------
@@ -55,7 +59,30 @@ embedding learned with local constraints}
 \section{Problem formulation}
 
 \begin{frame}
-    \frametitle{Instance Segmentation}
+    \frametitle{Instance Segmentation Problem}
+
+    Let $T = \left( X^{(i)}, Y^{(i)} \right)_{i=1}^N$ be a labeled dataset of size $N$:
+    $X^{(i)} \in \mathbb{R}^{H \times W \times C}$ -- image of size $H \times W$ with $C$ channels
+    and $Y^{(i)} \in (K \times \mathbb{N})^{H \times W}$ -- target, where
+    $K$ -- set of classes, and the second part of the tuple is an instance ID.
+
+    Given loss function $\mathcal{L}:
+        \left[ (K \times {\mathbb{N}})^{H \times W} \right]^2 \rightarrow \mathbb{R}$
+    and the model
+    $f: \Theta \times \mathbb{R}^{H \times W \times C} \rightarrow
+        (K \times {\mathbb{N}})^{H \times W} $,
+    the instance segmentation problem is:
+    \[
+        \arg \min\limits_{\theta \in \Theta} \frac{1}{N}
+        \sum\limits_{\left( X^{(i)}, Y^{(i)} \right) \in T}
+        \mathcal{L}\left( f_{\theta}\left( X^{(i)} \right), Y^{(i)} \right)
+    \]
+
+    \begin{alertblock}{Instance Segmentation in Bioinformatic}
+        Model which we will discuss today was proposed for
+        a particular case of this problem, where $|K|=2$: background and
+        foreground, which is usual for bioimage analysis.
+    \end{alertblock}
 
 \end{frame}
 
@@ -79,9 +106,73 @@ embedding learned with local constraints}
 \end{frame}
 
 \begin{frame}
-    \frametitle{Metric}
+    \frametitle{Metrics: Average Precision}
+
+    The most knows and usable metric is an average precision or PR-AUC:
+    \[
+        \AP = \int\limits_0^1 \text{Precision}(\text{Recall}) d \text{Recall}
+    \]
+    Precision and recall computed iff the IoU of bboxes greater than threshold
+    \[
+        \text{Precision} = \frac{TP}{TP + FP} \qquad
+        \text{Recall} = \frac{TP}{TP + FN}
+    \]
+
+    \begin{figure}[h]
+        \begin{subfigure}{0.3\textwidth}
+            \includegraphics[height=0.2\textheight]{iou.pdf}
+            \caption{Intersection Over Union. Source: \cite{zhang2021dive}}
+        \end{subfigure}
+        \begin{subfigure}{0.3\textwidth}
+            \begin{table}
+                \begin{tabular}{cc|c|c}
+                    \multicolumn{2}{c}{}                             & \multicolumn{2}{c}{Actual}           \\
+                                                                     &                            & 1  & 0  \\
+                    \cline{2-4}
+                    \multirow{2}{*}{\rotatebox[origin=c]{90}{Pred.}} & 1                          & TP & FP \\
+                    \cline{2-4}
+                                                                     & 0                          & FN & TN
+                \end{tabular}
+                \caption{Confusion Matrix}
+            \end{table}
+        \end{subfigure}
+        \begin{subfigure}{0.3\textwidth}
+            \includegraphics[height=0.25\textheight, trim={2cm 0.5cm 4.5cm 4cm},clip]{pr_curve.png}
+            \caption{Precision Recall curve. Source: \cite{pr_auc}}
+        \end{subfigure}
+        \caption{Building blocks of the AP metric}
+    \end{figure}
 
 \end{frame}
+
+\begin{frame}
+    \frametitle{Metrics}
+
+    Let $M$ be a number of actual objects and $P$ -- predicted,
+    $L$ and $\hat{L}$ be an
+    predicted and actual object labeling respectively, then
+    (Foreground) \textbf{Dice} or Jaccard Index is
+    \[
+        \text{Dice}(L, \hat{L}) = \frac{2|L \cap \hat{L}|}{|L| + |\hat{L}|}
+    \]
+
+    \textbf{(Symmetric) Best Dice} is
+    \[
+        \text{BD}(L_1, L_2) =
+        \frac{1}{M} \sum\limits_{i=1}^{M} \max\limits_{1 \leq j \leq P}
+        \frac{2|L_{1_i} \cap L_{2_j}|}{|L_{1_i}| + |L_{2_j}|}
+        \quad
+        \text{SBD}(L, \hat{L}) =
+        \min \left\{ \substack{BD(L, \hat{L}) \\ BD(\hat{L}, L)} \right\}
+    \]
+
+    \textbf{Difference in Count} is
+    \[
+        \text{DiC} = P - M
+    \]
+
+\end{frame}
+
 
 \section{Previous approaches}
 
