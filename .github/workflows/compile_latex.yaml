@@ -29,8 +29,10 @@ jobs:
           compiler: pdflatex
           args: -interaction=nonstopmode -shell-escape
       - name: Create release
-        uses: elgohr/Github-Release-Action@v4
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-        with:
-          title: Slides for the Computational Life Science Seminar at TU Dresden (SS 2023)
+        uses: svenstaro/upload-release-action@v2
+          with:
+            repo_token: ${{ secrets.RELEASE_TOKEN }}
+            file: slides.pdf
+            asset_name: 'Oleh Shkalikov CLSS.pdf'
+            overwrite: true
+            body: "Slides for the Computational Life Science Seminar at TU Dresden (SS 2023)"
